@@ -1,6 +1,4 @@
-#if canImport(simd)
-import simd
-#endif
+
 
 public struct Matrix2x2<T: ArithmeticType>: MatrixType {
     public typealias Element = T
@@ -195,14 +193,7 @@ public struct Matrix2x2<T: ArithmeticType>: MatrixType {
     }
 
     public var inverse: Matrix2x2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(self, to: float2x2.self).inverse, to: Matrix2x2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(self, to: double2x2.self).inverse, to: Matrix2x2<T>.self)
-            }
-        #endif
+        
         let invdet: T = 1 / determinant
         return invdet * Matrix2x2<T>(self.y.y, 0 - self.x.y, 0 - self.y.x, self.x.x)
     }
@@ -223,40 +214,19 @@ public struct Matrix2x2<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(v: Vector2<T>, m: Matrix2x2<T>) -> Vector2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(v, to: float2.self) * unsafeBitCast(m, to: float2x2.self), to: Vector2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(v, to: double2.self) * unsafeBitCast(m, to: double2x2.self), to: Vector2<T>.self)
-            }
-        #endif
+        
         let x: T = v.x * m.x.x + v.y * m.x.y
         let y: T = v.x * m.y.x + v.y * m.y.y
         return Vector2<T>(x, y)
     }
 
     public static func *(m: Matrix2x2<T>, v: Vector2<T>) -> Vector2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m, to: float2x2.self) * unsafeBitCast(v, to: float2.self), to: Vector2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m, to: double2x2.self) * unsafeBitCast(v, to: double2.self), to: Vector2<T>.self)
-            }
-        #endif
+        
         return m.x * v.x + m.y * v.y
     }
 
     public static func *(m1: Matrix2x2<T>, m2: Matrix2x2<T>) -> Matrix2x2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x2.self) * unsafeBitCast(m2, to: float2x2.self), to: Matrix2x2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x2.self) * unsafeBitCast(m2, to: double2x2.self), to: Matrix2x2<T>.self)
-            }
-        #endif
+        
         var x: Vector2<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector2<T> = m1.x * m2[1].x
@@ -265,14 +235,7 @@ public struct Matrix2x2<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m1: Matrix2x2<T>, m2: Matrix3x2<T>) -> Matrix3x2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x2.self) * unsafeBitCast(m2, to: float3x2.self), to: Matrix3x2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x2.self) * unsafeBitCast(m2, to: double3x2.self), to: Matrix3x2<T>.self)
-            }
-        #endif
+        
         var x: Vector2<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector2<T> = m1.x * m2[1].x
@@ -283,14 +246,7 @@ public struct Matrix2x2<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m1: Matrix2x2<T>, m2: Matrix4x2<T>) -> Matrix4x2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x2.self) * unsafeBitCast(m2, to: float4x2.self), to: Matrix4x2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x2.self) * unsafeBitCast(m2, to: double4x2.self), to: Matrix4x2<T>.self)
-            }
-        #endif
+        
         var x: Vector2<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector2<T> = m1.x * m2[1].x

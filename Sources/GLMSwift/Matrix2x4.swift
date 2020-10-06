@@ -1,6 +1,4 @@
-#if canImport(simd)
-import simd
-#endif
+
 
 public struct Matrix2x4<T: ArithmeticType>: MatrixType {
     public typealias Element = T
@@ -208,14 +206,7 @@ public struct Matrix2x4<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(v: Vector4<T>, m: Matrix2x4<T>) -> Vector2<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(v, to: float4.self) * unsafeBitCast(m, to: float2x4.self), to: Vector2<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(v, to: double4.self) * unsafeBitCast(m, to: double2x4.self), to: Vector2<T>.self)
-            }
-        #endif
+        
         var x: T = v.x * m.x.x
             x = x + v.y * m.x.y
             x = x + v.z * m.x.z
@@ -228,26 +219,12 @@ public struct Matrix2x4<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m: Matrix2x4<T>, v: Vector2<T>) -> Vector4<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m, to: float2x4.self) * unsafeBitCast(v, to: float2.self), to: Vector4<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m, to: double2x4.self) * unsafeBitCast(v, to: double2.self), to: Vector4<T>.self)
-            }
-        #endif
+        
         return m.x * v.x + m.y * v.y
     }
 
     public static func *(m1: Matrix2x4<T>, m2: Matrix2x2<T>) -> Matrix2x4<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x4.self) * unsafeBitCast(m2, to: float2x2.self), to: Matrix2x4<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x4.self) * unsafeBitCast(m2, to: double2x2.self), to: Matrix2x4<T>.self)
-            }
-        #endif
+        
         var x: Vector4<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector4<T> = m1.x * m2[1].x
@@ -256,14 +233,7 @@ public struct Matrix2x4<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m1: Matrix2x4<T>, m2: Matrix3x2<T>) -> Matrix3x4<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x4.self) * unsafeBitCast(m2, to: float3x2.self), to: Matrix3x4<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x4.self) * unsafeBitCast(m2, to: double3x2.self), to: Matrix3x4<T>.self)
-            }
-        #endif
+        
         var x: Vector4<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector4<T> = m1.x * m2[1].x
@@ -274,14 +244,7 @@ public struct Matrix2x4<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m1: Matrix2x4<T>, m2: Matrix4x2<T>) -> Matrix4x4<T> {
-        #if canImport(simd)
-            if T.self == Float.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: float2x4.self) * unsafeBitCast(m2, to: float4x2.self), to: Matrix4x4<T>.self)
-            }
-            if T.self == Double.self {
-                return unsafeBitCast(unsafeBitCast(m1, to: double2x4.self) * unsafeBitCast(m2, to: double4x2.self), to: Matrix4x4<T>.self)
-            }
-        #endif
+        
         var x: Vector4<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
         var y: Vector4<T> = m1.x * m2[1].x

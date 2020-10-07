@@ -1,5 +1,3 @@
-
-
 public struct Matrix4x4<T: ArithmeticType>: MatrixType {
     public typealias Element = T
 
@@ -461,7 +459,6 @@ public struct Matrix4x4<T: ArithmeticType>: MatrixType {
     }
 
     public static func *(m1: Matrix4x4<T>, m2: Matrix4x4<T>) -> Matrix4x4<T> {
-        
         var x: Vector4<T> = m1.x * m2[0].x
             x = x + m1.y * m2[0].y
             x = x + m1.z * m2[0].z

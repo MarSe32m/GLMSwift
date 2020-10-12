@@ -1,207 +1,148 @@
-public struct Vector2<T: ArithmeticType>: VectorType {
-    public typealias Element = T
-    public typealias FloatVector = Vector2<Float>
-    public typealias DoubleVector = Vector2<Double>
-    public typealias Int32Vector = Vector2<Int32>
-    public typealias UInt32Vector = Vector2<UInt32>
-    public typealias BooleanVector = Vector2b
+import func Foundation.sqrt
+import func Foundation.acos
+import struct Foundation.CGFloat
 
-    public var x: T, y: T
+public typealias vec2i = Vector2<Int>
+public typealias vec2u = Vector2<UInt>
+public typealias vec2d = Vector2<Double>
+public typealias vec2f = Vector2<Float>
+public typealias vec2  = vec3f
 
-    public var r: T { get { return x } set { x = newValue } }
-    public var g: T { get { return y } set { y = newValue } }
+public struct Vector2<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
+    public var x: T
+    public var y: T
 
-    public var s: T { get { return x } set { x = newValue } }
-    public var t: T { get { return y } set { y = newValue } }
-
-    public var elements: [Element] {
-        return [x, y]
+    public var description: String {
+        "(\(x), \(y))"
     }
 
-    public func makeIterator() -> IndexingIterator<Array<Element>> {
-        return elements.makeIterator()
+    public var inverse: Vector2<T> {
+        -self
     }
 
-    public subscript(index: Int) -> T {
-        get {
-            switch(index) {
-            case 0: return x
-            case 1: return y
-            default: preconditionFailure("Vector index out of range")
-            }
-        }
-        set {
-            switch(index) {
-            case 0: x = newValue
-            case 1: y = newValue
-            default: preconditionFailure("Vector index out of range")
-            }
-        }
-    }
-
-    public var debugDescription: String {
-        return String(describing: type(of: self)) + "(\(x), \(y))"
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(GLMSwift.hash(x.hashValue, y.hashValue))
-    }
-
-    public init () {
-        self.x = 0
-        self.y = 0
-    }
-
-    public init (_ v: T) {
-        self.x = v
-        self.y = v
-    }
-
-    public init(_ array: [T]) {
-        precondition(array.count == 2, "Vector2 requires a 2-element array")
-        self.x = array[0]
-        self.y = array[1]
-    }
-
-    public init(arrayLiteral elements: T...) {
-        self.init(elements)
-    }
-
-    public init (_ x: T, _ y: T) {
+    public init(_ x: T = 0, _ y: T = 0) {
         self.x = x
         self.y = y
     }
 
-    public init (x: T, y: T) {
+    public init(x: T = 0, y: T = 0) {
         self.x = x
         self.y = y
     }
 
-    public init (r: T, g: T) {
-        self.x = r
-        self.y = g
+    public init<U>(vector2: Vector2<U>) where U: BinaryInteger {
+        self.x = T(exactly: vector2.x) ?? 0
+        self.y = T(exactly: vector2.y) ?? 0
     }
 
-    public init (s: T, t: T) {
-        self.x = s
-        self.y = t
+    public init<U>(_ vector2: Vector2<U>) where U: BinaryInteger {
+        self.x = T(exactly: vector2.x) ?? 0
+        self.y = T(exactly: vector2.y) ?? 0
     }
 
-    public init (_ v: Vector2<T>) {
-        self.x = v.x
-        self.y = v.y
+    public func dot(_ rhs: Vector2<T>) -> T {
+        x * rhs.x + y * rhs.y
     }
 
-    public init (_ v: Vector3<T>) {
-        self.x = v.x
-        self.y = v.y
+    public func cross(_ rhs: Vector2<T>) -> T {
+        return x * rhs.y - y * rhs.x
     }
 
-    public init (_ v: Vector4<T>) {
-        self.x = v.x
-        self.y = v.y
+    public static func +(lhs: Vector2<T>, rhs: Vector2<T>) -> Vector2<T> {
+        Vector2<T>(lhs.x + rhs.x, lhs.y + rhs.y)
+    }
+    
+    public static func +=(lhs: inout Vector2<T>, rhs: Vector2<T>) {
+        lhs = lhs + rhs
+    }
+    
+    public static func -(lhs: Vector2<T>, rhs: Vector2<T>) -> Vector2<T> {
+        Vector2<T>(lhs.x - rhs.x, lhs.y - rhs.y)
+    }
+    
+    public static func -=(lhs: inout Vector2<T>, rhs: Vector2<T>) {
+        lhs = lhs - rhs
     }
 
-    public init (_ v: Vector2<Double>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    public static func *(lhs: T, rhs: Vector2<T>) -> Vector2<T> {
+        Vector2<T>(lhs * rhs.x, lhs * rhs.y)
+    }
+    
+    public static func *(lhs: Vector2<T>, rhs: T) -> Vector2<T> {
+        rhs * lhs
     }
 
-    public init (_ v: Vector2<Float>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    public static func *=(lhs: inout Vector2<T>, rhs: T) {
+        lhs = rhs * lhs
     }
 
-    public init (_ v: Vector2<Int>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    public static prefix func -(vector: Vector2<T>) -> Vector2<T> {
+        -1 * vector
     }
 
-    public init (_ v: Vector2<UInt>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    static func ~= (lhs: Vector2<T>, rhs: Vector2<T>) -> Bool {
+        return lhs.x ~= rhs.x && lhs.y ~= rhs.y
+    }
+}
+
+public extension Vector2 where T: FloatingPoint {
+    var lengthSquared: T {
+        x * x + y * y
     }
 
-    public init (_ v: Vector2<Int8>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    var length: T {
+        return sqrt(lengthSquared)
     }
 
-    public init (_ v: Vector2<UInt8>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    var normalized: Vector2<T> {
+        self / length
     }
 
-    public init (_ v: Vector2<Int16>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    func angle(with other: Vector2<T>) -> T {
+        let x = self.dot(other) / (self.length * other.length)
+        switch x {
+            case let x as Double:
+                return acos(x) as? T ?? 0
+            case let x as CGFloat:
+                return acos(x) as? T ?? 0
+            case let x as Float:
+                return acos(x) as? T ?? 0
+            default:
+                return 0 as T
+        }
     }
 
-    public init (_ v: Vector2<UInt16>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    static func /(lhs: Vector2<T>, rhs: T) -> Vector2<T> {
+        Vector2<T>(lhs.x / rhs, lhs.y / rhs)
     }
 
-    public init (_ v: Vector2<Int32>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    static func /=(lhs: inout Vector2<T>, rhs: T) {
+        lhs = lhs / rhs
+    }
+}
+
+public extension Vector2 where T: BinaryInteger {
+    var lengthSquared: T {
+        return x * x + y * y
     }
 
-    public init (_ v: Vector2<UInt32>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    var length: Double {
+        return sqrt(Double(lengthSquared))
     }
 
-    public init (_ v: Vector2<Int64>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    var normalized: Vector2<Double> {
+        Vector2<Double>(Double(x), Double(y)) / length
     }
 
-    public init (_ v: Vector2<UInt64>) {
-        self.x = T(v.x)
-        self.y = T(v.y)
+    func angle(with other: Vector2<T>) -> Double {
+        acos(Double(self.dot(other)) / (self.length * other.length))
     }
 
-    public init (_ s: T, _ v: Vector2<T>, _ op:(_:T, _:T) -> T) {
-        self.x = op(s, v.x)
-        self.y = op(s, v.y)
+    static func /<U: BinaryFloatingPoint>(lhs: Vector2<T>, rhs: U) -> Vector2<T> {
+        Vector2<T>(T(U(lhs.x) / rhs), T(U(lhs.y) / rhs))
     }
 
-    public init (_ v: Vector2<T>, _ s: T, _ op:(_:T, _:T) -> T) {
-        self.x = op(v.x, s)
-        self.y = op(v.y, s)
-    }
-
-    public init<T: VectorType>(_ v: T, _ op:(_:T.Element) -> Element) where T.BooleanVector == BooleanVector {
-            self.x = op(v[0])
-            self.y = op(v[1])
-    }
-
-    public init<T1: VectorType, T2: VectorType>(_ v1: T1, _ v2: T2, _ op:(_:T1.Element, _:T2.Element) -> Element) where
-        T1.BooleanVector == BooleanVector, T2.BooleanVector == BooleanVector {
-            self.x = op(v1[0], v2[0])
-            self.y = op(v1[1], v2[1])
-    }
-
-    public init<T1: VectorType, T2: VectorType>(_ v1: T1, _ v2:inout T2, _ op:(_:T1.Element, _:inout T2.Element) -> Element) where
-        T1.BooleanVector == BooleanVector, T2.BooleanVector == BooleanVector {
-            self.x = op(v1[0], &v2[0])
-            self.y = op(v1[1], &v2[1])
-    }
-
-    public init<T1: VectorType, T2: VectorType, T3: VectorType>(_ v1: T1, _ v2: T2, _ v3: T3, _ op:(_:T1.Element, _:T2.Element, _:T3.Element) -> Element) where
-        T1.BooleanVector == BooleanVector, T2.BooleanVector == BooleanVector, T3.BooleanVector == BooleanVector {
-            self.x = op(v1[0], v2[0], v3[0])
-            self.y = op(v1[1], v2[1], v3[1])
-    }
-
-    public init<T1: VectorType, T2: VectorType, T3: BooleanVectorType>(_ v1: T1, _ v2: T2, _ v3: T3, _ op:(_:T1.Element, _:T2.Element, _:Bool) -> Element) where
-        T1.BooleanVector == BooleanVector, T2.BooleanVector == BooleanVector, T3.BooleanVector == BooleanVector {
-            self.x = op(v1[0], v2[0], v3[0])
-            self.y = op(v1[1], v2[1], v3[1])
-    }
-
-    public static func ==(v1: Vector2<T>, v2: Vector2<T>) -> Bool {
-        return v1.x == v2.x && v1.y == v2.y
+    static func /=<U: BinaryFloatingPoint>(lhs: inout Vector2<T>, rhs: U) {
+        lhs = lhs / rhs
     }
 }

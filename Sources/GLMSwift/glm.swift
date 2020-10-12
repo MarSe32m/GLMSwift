@@ -1,478 +1,157 @@
-// Portability for Christophe Riccio's glm
-// http://glm.g-truc.net/
+import func Foundation.sin
+import func Foundation.cos
+import func Foundation.tan
 
-// Options may be changed at run time.
-// This is global and not thread local.
-public var glmLeftHanded = false
-public var glmDepthZeroToOne = false
-
-// Integer matrices
-
-public typealias imat2 = Matrix2x2<Int32>
-public typealias umat2 = Matrix2x2<UInt32>
-public typealias imat3 = Matrix3x3<Int32>
-public typealias umat3 = Matrix3x3<UInt32>
-public typealias imat4 = Matrix4x4<Int32>
-public typealias umat4 = Matrix4x4<UInt32>
-
-public typealias imat2x2 = Matrix2x2<Int32>
-public typealias umat2x2 = Matrix2x2<UInt32>
-public typealias imat2x3 = Matrix2x3<Int32>
-public typealias umat2x3 = Matrix2x3<UInt32>
-public typealias imat2x4 = Matrix2x4<Int32>
-public typealias umat2x4 = Matrix2x4<UInt32>
-
-public typealias imat3x2 = Matrix3x2<Int32>
-public typealias umat3x2 = Matrix3x2<UInt32>
-public typealias imat3x3 = Matrix3x3<Int32>
-public typealias umat3x3 = Matrix3x3<UInt32>
-public typealias imat3x4 = Matrix3x4<Int32>
-public typealias umat3x4 = Matrix3x4<UInt32>
-
-public typealias imat4x2 = Matrix4x2<Int32>
-public typealias umat4x2 = Matrix4x2<UInt32>
-public typealias imat4x3 = Matrix4x3<Int32>
-public typealias umat4x3 = Matrix4x3<UInt32>
-public typealias imat4x4 = Matrix4x4<Int32>
-public typealias umat4x4 = Matrix4x4<UInt32>
-
-extension GLMSwift {
-    public static func translate<T>(_ m: Matrix4x4<T>, _ v: Vector3<T>) -> Matrix4x4<T> {
-        var m3: Vector4<T> = m[0] * v[0]
-        m3 += m[1] * v[1]
-        m3 += m[2] * v[2]
-        m3 += m[3]
-        return Matrix4x4<T>(m[0], m[1], m[2], m3)
+struct GLMSwift {
+    public static func translation<T: FloatingPoint>(vector: Vector3<T>) -> Matrix4<T> {
+        translation(vector)
     }
 
-    public static func rotate<T: FloatingPointArithmeticType>
-        (_ m: Matrix4x4<T>, _ angle: T, _ v: Vector3<T>) -> Matrix4x4<T> {
+    public static func translation<T: FloatingPoint>(_ v: Vector3<T>) -> Matrix4<T> {
+        Matrix4<T>(1, 0, 0, v.x, 0, 1, 0, v.y, 0, 0, 1, v.z, 0, 0, 0, 1)
+    }
+
+    public static func rotation<T: BinaryFloatingPoint>(angle: T, axis: Vector3<T>) -> Matrix4<T> {
+        rotation(angle, axis)
+    }
+
+    public static func rotation<T: BinaryFloatingPoint>(_ angle: T, _ v: Vector3<T>) -> Matrix4<T> {
         let a = angle
-        let c = GLMSwift.SGLcos(a)
-        let s = GLMSwift.SGLsin(a)
-        let axis = normalize(v)
-        let temp = (1 - c) * axis
-        var r00: T = c
-            r00 += temp[0] * axis[0]
-        var r01: T = temp[0] * axis[1]
-            r01 += s * axis[2]
-        var r02: T = temp[0] * axis[2]
-            r02 -= s * axis[1]
-        var r10: T = temp[1] * axis[0]
-            r10 -= s * axis[2]
-        var r11: T = c
-            r11 += temp[1] * axis[1]
-        var r12: T = temp[1] * axis[2]
-            r12 += s * axis[0]
-        var r20: T = temp[2] * axis[0]
-            r20 += s * axis[1]
-        var r21: T = temp[2] * axis[1]
-            r21 -= s * axis[0]
-        var r22: T = c
-            r22 += temp[2] * axis[2]
+        let cosine = T(cos(Double(a)))
+        let sine = T(sin(Double(a)))
+        let axis = v.normalized
+        let temp = (1 - cosine) * axis
 
-        var Result = Matrix4x4<T>(
-            m[0] * r00,
-            m[0] * r10,
-            m[0] * r20,
-            m[3]
-        )
-        Result[0] += m[1] * r01
-        Result[0] += m[2] * r02
-        Result[1] += m[1] * r11
-        Result[1] += m[2] * r12
-        Result[2] += m[1] * r21
-        Result[2] += m[2] * r22
-        return Result
+        let r00: T = cosine + temp.x * axis.x
+        let r01: T = temp.y * axis.x - sine * axis.z
+        let r02: T = temp.z * axis.x + sine * axis.y
+
+        let r10: T = temp.x * axis.y + sine * axis.z
+        let r11: T = cosine + temp.y * axis.y
+        let r12: T = temp.z * axis.y - sine * axis.x
+
+        let r20: T = temp.x * axis.z - sine * axis.y
+        let r21: T = temp.y * axis.z + sine * axis.x
+        let r22: T = cosine + temp.z * axis.z
+
+        return Matrix4<T>(r00, r01, r02, 0,
+                          r10, r11, r12, 0,
+                          r20, r21, r22, 0,
+                          0,     0,   0, 1)
     }
 
-    public static func rotateSlow<T: FloatingPointArithmeticType>
-        (_ m: Matrix4x4<T>, _ angle: T, _ v: Vector3<T>) -> Matrix4x4<T> {
-        let a = angle
-        let c = GLMSwift.SGLcos(a)
-        let s = GLMSwift.SGLsin(a)
-
-        let axis = normalize(v)
-
-        var r00: T = c
-            r00 += (1 - c) * axis.x * axis.x
-        var r01: T = (1 - c) * axis.x * axis.y
-            r01 += s * axis.z
-        var r02: T = (1 - c) * axis.x * axis.z
-            r02 -= s * axis.y
-
-        var r10: T = (1 - c) * axis.y * axis.x
-            r10 -= s * axis.z
-        var r11: T = c
-            r11 += (1 - c) * axis.y * axis.y
-        var r12: T = (1 - c) * axis.y * axis.z
-            r12 += s * axis.x
-
-        var r20: T = (1 - c) * axis.z * axis.x
-            r20 += s * axis.y
-        var r21: T = (1 - c) * axis.z * axis.y
-            r21 -= s * axis.x
-        var r22: T = c
-            r22 += (1 - c) * axis.z * axis.z
-
-        return Matrix4x4<T>(
-            r00, r01, r02, 0,
-            r10, r11, r12, 0,
-            r20, r21, r22, 0,
-            0, 0, 0, 1
-        )
+    public static func scale<T: FloatingPoint>(xScale: T, yScale: T, zScale: T) -> Matrix4<T> {
+        scale(Vector3<T>(xScale, yScale, zScale))
     }
 
-    public static func scale<T>(_ m: Matrix4x4<T>, _ v: Vector3<T>) -> Matrix4x4<T> {
-        return Matrix4x4<T>(
-            m[0] * v[0],
-            m[1] * v[1],
-            m[2] * v[2],
-            m[3]
-        )
+    public static func scale<T>(_ v: Vector3<T>) -> Matrix4<T> {
+        Matrix4<T>(v.x, 0, 0, 0, 0, v.y, 0, 0,0, 0, v.z, 0,0, 0, 0, 1)
     }
 
-    public static func ortho<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return orthoLH(left, right, bottom, top, zNear, zFar)
-        } else {
-            return orthoRH(left, right, bottom, top, zNear, zFar)
-        }
+    public static func ortho<T: BinaryFloatingPoint>(left: T, right: T, bottom: T, top: T, zNear: T = -1.0, zFar: T = 1.0) -> Matrix4<T> {
+        ortho(left, right, bottom, top, zNear, zFar)
     }
 
-    public static func ortho<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T) -> Matrix4x4<T> {
+    public static func ortho<T: BinaryFloatingPoint>(_ left: T, _ right: T, _ bottom: T, _ top: T, _ zNear: T = -1.0, _ zFar: T = 1.0) -> Matrix4<T> {
         let r00: T = 2 / (right - left)
         let r11: T = 2 / (top - bottom)
+        let r22: T = -2 / (zFar - zNear)
+        
+        let r03: T = -(right + left) / (right - left)
+        let r13: T = -(top + bottom) / (top - bottom)
+        let r23: T = -(zFar + zNear) / (zFar - zNear)
 
-        let r30: T = -(right + left) / (right - left)
-        let r31: T = -(top + bottom) / (top - bottom)
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, -1, 0,
-            r30, r31, 0, 1
-        )
+        return Matrix4<T>(r00, 0,   0,   r03,
+                          0, r11,   0,   r13,
+                          0,   0, r22,   r23,
+                          0,   0,   0,   1)
     }
 
-    public static func orthoLH<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        let r00: T = 2 / (right - left)
-        let r11: T = 2 / (top - bottom)
-        let r30: T = -(right + left) / (right - left)
-        let r31: T = -(top + bottom) / (top - bottom)
-
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = 1 / (zFar - zNear)
-            r32 = -zNear / (zFar - zNear)
-        } else {
-            r22 = 2 / (zFar - zNear)
-            r32 = -(zFar + zNear) / (zFar - zNear)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, 0,
-            r30, r31, r32, 1
-        )
+    public static func orthoInverse<T: BinaryFloatingPoint>(left: T, right: T, bottom: T, top: T, zNear: T, zFar: T) -> Matrix4<T> {
+        orthoInverse(left, right, bottom, top, zNear, zFar)
     }
 
-    public static func orthoRH<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        let r00: T = 2 / (right - left)
-        let r11: T = 2 / (top - bottom)
-        let r30: T = -(right + left) / (right - left)
-        let r31: T = -(top + bottom) / (top - bottom)
+    public static func orthoInverse<T: BinaryFloatingPoint>(_ left: T, _ right: T, _ bottom: T, _ top: T, _ zNear: T, _ zFar: T) -> Matrix4<T> {
+        let r00: T = (right - left) / 2
+        let r11: T = (top - bottom) / 2
+        let r22: T = -(top - bottom) / 2
 
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = -1 / (zFar - zNear)
-            r32 = -zNear / (zFar - zNear)
-        } else {
-            r22 = -2 / (zFar - zNear)
-            r32 = -(zFar + zNear) / (zFar - zNear)
-        }
+        let r03: T = (left + right) / 2
+        let r13: T = (top + bottom) / 2
+        let r23: T = -(zFar + zNear) / 2
 
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, 0,
-            r30, r31, r32, 1
-        )
+        return Matrix4<T>(r00, 0,   0,  r03,
+                          0, r11,   0,  r13,
+                          0,   0, r22,  r23,
+                          0,   0,   0,  1)
     }
 
-    public static func frustum<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ nearVal: T, _ farVal: T) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return frustumLH(left, right, bottom, top, nearVal, farVal)
-        } else {
-            return frustumRH(left, right, bottom, top, nearVal, farVal)
-        }
+    public static func frustum<T: BinaryFloatingPoint>(left: T, right: T, bottom: T, top: T, nearVal: T, farVal: T) -> Matrix4<T> {
+        frustum(left, right, bottom, top, nearVal, farVal)
     }
 
-    public static func frustumLH<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ nearVal: T, _ farVal: T) -> Matrix4x4<T> {
+    public static func frustum<T: BinaryFloatingPoint>(_ left: T, _ right: T, _ bottom: T, _ top: T, _ nearVal: T, _ farVal: T) -> Matrix4<T> {
         let r00: T = (2 * nearVal) / (right - left)
         let r11: T = (2 * nearVal) / (top - bottom)
-        let r20: T = (right + left) / (right - left)
-        let r21: T = (top + bottom) / (top - bottom)
+        let r02: T = (right + left) / (right - left)
+        let r12: T = (top + bottom) / (top - bottom)
+        let r22: T = -(farVal + nearVal) / (farVal - nearVal)
+        let r23: T = -(2 * farVal * nearVal) / (farVal - nearVal)
 
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = farVal / (farVal - nearVal)
-            r32 = -(farVal * nearVal)
-            r32 /= (farVal - nearVal)
-        } else {
-            r22 = (farVal + nearVal) / (farVal - nearVal)
-            r32 = -(2 * farVal * nearVal)
-            r32 /= (farVal - nearVal)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            r20, r21, r22, 1,
-            0, 0, r32, 0
-        )
+        return Matrix4<T>(r00, 0, r02, 0,
+                          0, r11, r12, 0,
+                          0,   0, r22, r23,
+                          0,   0,  -1, 0)
     }
 
-    public static func frustumRH<T: FloatingPointArithmeticType>
-        (_ left: T, _ right: T, _ bottom: T, _ top: T, _ nearVal: T, _ farVal: T) -> Matrix4x4<T> {
-        let r00: T = (2 * nearVal) / (right - left)
-        let r11: T = (2 * nearVal) / (top - bottom)
-        let r20: T = (right + left) / (right - left)
-        let r21: T = (top + bottom) / (top - bottom)
-
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = farVal / (nearVal - farVal)
-            r32 = -(farVal * nearVal)
-            r32 /= (farVal - nearVal)
-        } else {
-            r22 = -(farVal + nearVal) / (farVal - nearVal)
-            r32 = -(2 * farVal * nearVal)
-            r32 /= (farVal - nearVal)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            r20, r21, r22, -1,
-            0, 0, r32, 0
-        )
+    public static func perspective<T: BinaryFloatingPoint>(fov: T, aspectRatio: T, zNear: T, zFar: T) -> Matrix4<T> {
+        perspective(fov, aspectRatio, zNear, zFar)
     }
 
-    public static func perspective<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return perspectiveLH(fovy, aspect, zNear, zFar)
-        } else {
-            return perspectiveRH(fovy, aspect, zNear, zFar)
-        }
+    public static func perspective<T: BinaryFloatingPoint>(_ fov: T, _ aspectRatio: T, _ zNear: T, _ zFar: T) -> Matrix4<T> {
+        assert(aspectRatio > 0)
+        let tanHalfFov = T(tan(Double(fov/2)))
+
+        let r00: T = 1 / (aspectRatio * tanHalfFov)
+        let r11: T = 1 / tanHalfFov
+
+        let r22: T = -(zFar + zNear) / (zFar - zNear)
+        let r23: T = -(2 * zFar * zNear) / (zFar - zNear)
+
+        return Matrix4<T>(r00, 0, 0, 0,
+                          0, r11, 0, 0,
+                          0, 0, r22, r23,
+                          0, 0,  -1, 0)
     }
 
-    public static func perspectiveLH<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        assert(aspect > 0)
-
-        let tanHalfFovy = GLMSwift.SGLtan(fovy / 2)
-
-        let r00: T = 1 / (aspect * tanHalfFovy)
-        let r11: T = 1 / (tanHalfFovy)
-
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = zFar / (zFar - zNear)
-            r32 = -(zFar * zNear) / (zFar - zNear)
-        } else {
-            r22 = (zFar + zNear) / (zFar - zNear)
-            r32 = -(2 * zFar * zNear)
-            r32 /= (zFar - zNear)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, 1,
-            0, 0, r32, 0
-        )
+    public static func perspectiveFov<T: BinaryFloatingPoint>(fov: T, width: T, height: T, zNear: T, zFar: T) -> Matrix4<T> {
+        perspectiveFov(fov, width, height, zNear, zFar)
     }
 
-    public static func perspectiveRH<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        assert(aspect > 0)
-
-        let tanHalfFovy = GLMSwift.SGLtan(fovy / 2)
-
-        let r00: T = 1 / (aspect * tanHalfFovy)
-        let r11: T = 1 / (tanHalfFovy)
-
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = zFar / (zNear - zFar)
-            r32 = -(zFar * zNear) / (zFar - zNear)
-        } else {
-            r22 = -(zFar + zNear) / (zFar - zNear)
-            r32 = -(2 * zFar * zNear)
-            r32 /= (zFar - zNear)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, -1,
-            0, 0, r32, 0
-        )
-    }
-
-    public static func perspectiveFov<T: FloatingPointArithmeticType>
-        (_ fov: T, _ width: T, _ height: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return perspectiveFovLH(fov, width, height, zNear, zFar)
-        } else {
-            return perspectiveFovRH(fov, width, height, zNear, zFar)
-        }
-    }
-
-    public static func perspectiveFovLH<T: FloatingPointArithmeticType>
-        (_ fov: T, _ width: T, _ height: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
+    public static func perspectiveFov<T: BinaryFloatingPoint>(_ fov: T, _ width: T, _ height: T, _ zNear: T, _ zFar: T) -> Matrix4<T> {
         assert(fov > 0)
         assert(width > 0)
         assert(height > 0)
-
-        let r00: T = GLMSwift.SGLcos(fov / 2) / GLMSwift.SGLsin(fov / 2)
-        let r11: T = r00 * height / width
-
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = zFar / (zNear - zFar)
-            r32 = -(zFar * zNear) / (zFar - zNear)
-        } else {
-            r22 = -(zFar + zNear) / (zFar - zNear)
-            r32 = -(2 * zFar * zNear)
-            r32 /= (zFar - zNear)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, -1,
-            0, 0, r32, 0
-        )
+        let aspectRatio = width / height
+        return perspective(fov, aspectRatio, zNear, zFar)
     }
 
-    public static func perspectiveFovRH<T: FloatingPointArithmeticType>
-        (_ fov: T, _ width: T, _ height: T, _ zNear: T, _ zFar: T) -> Matrix4x4<T> {
-        assert(fov > 0)
-        assert(width > 0)
-        assert(height > 0)
+    public static func lookAtRH<T: BinaryFloatingPoint>(_ eye: Vector3<T>, _ center: Vector3<T>, _ up: Vector3<T>) -> Matrix4<T> {
+        let f: Vector3<T> = (center - eye).normalized
+        let s: Vector3<T> = (f.cross(up)).normalized
+        let u: Vector3<T> = s.cross(f)
 
-        let r00: T = GLMSwift.SGLcos(fov / 2) / GLMSwift.SGLsin(fov / 2)
-        let r11: T = r00 * height / width
+        let r03: T = -s.dot(eye)
+        let r13: T = -u.dot(eye)
+        let r23: T = f.dot(eye)
 
-        var r22: T, r32: T
-        if glmDepthZeroToOne {
-            r22 = zFar / (zFar - zNear)
-            r32 = -(zFar * zNear) / (zFar - zNear)
-        } else {
-            r22 = (zFar + zNear) / (zFar - zNear)
-            r32 = -(2 * zFar * zNear)
-            r32 /= (zFar - zNear)
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, 1,
-            0, 0, r32, 0
-        )
+        return Matrix4<T>(s.x, s.y, s.z, r03,
+                          u.x, u.y, u.z, r13,
+                          -f.x, -f.y, -f.z, r23,
+                             0,    0,    0,  1)
     }
 
-    public static func infinitePerspective<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ ep: T = 0) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return infinitePerspectiveLH(fovy, aspect, zNear, ep)
-        } else {
-            return infinitePerspectiveRH(fovy, aspect, zNear, ep)
-        }
-    }
-
-    public static func infinitePerspectiveLH<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ ep: T = 0) -> Matrix4x4<T> {
-        let range: T = GLMSwift.SGLtan(fovy / 2) * zNear
-        let left: T = -range * aspect
-        let right: T = range * aspect
-        let bottom: T = -range
-        let top: T = range
-
-        let r00: T = (2 * zNear) / (right - left)
-        let r11: T = (2 * zNear) / (top - bottom)
-        let r32: T = ep - (2 * zNear)
-
-        let r22: T
-        if ep == 0 {
-            switch(ep) {
-            case is Float:
-                r22 = T(0x1.fffffep-1)
-
-            case is Double:
-                r22 = T(0x1.fffffffffffffp-1)
-
-            default:
-                preconditionFailure()
-            }
-        } else {
-            r22 = 1 - ep
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, 1,
-            0, 0, r32, 0
-        )
-    }
-
-    public static func infinitePerspectiveRH<T: FloatingPointArithmeticType>
-        (_ fovy: T, _ aspect: T, _ zNear: T, _ ep: T = 0) -> Matrix4x4<T> {
-        let range: T = GLMSwift.SGLtan(fovy / 2) * zNear
-        let left: T = -range * aspect
-        let right: T = range * aspect
-        let bottom: T = -range
-        let top: T = range
-
-        let r00: T = (2 * zNear) / (right - left)
-        let r11: T = (2 * zNear) / (top - bottom)
-        let r32: T = ep - (2 * zNear)
-
-        let r22: T
-        if ep == 0 {
-            switch(ep) {
-            case is Float:
-                r22 = T(-0x1.fffffep-1)
-
-            case is Double:
-                r22 = T(-0x1.fffffffffffffp-1)
-
-            default:
-                preconditionFailure()
-            }
-        } else {
-            r22 = ep - 1
-        }
-
-        return Matrix4x4<T>(
-            r00, 0, 0, 0,
-            0, r11, 0, 0,
-            0, 0, r22, -1,
-            0, 0, r32, 0
-        )
-    }
-
+/*
     public static func project<T>
         (_ obj: Vector3<T>, _ model: Matrix4x4<T>, _ proj: Matrix4x4<T>, _ viewport: Vector4<T>) -> Vector3<T> {
         var tmp = Vector4<T>(obj, 1)
@@ -516,49 +195,5 @@ extension GLMSwift {
         )
         return scale(translate(Matrix4x4<T>(), trans), scal)
     }
-
-    public static func lookAt<T: FloatingPointArithmeticType>
-        (_ eye: Vector3<T>, _ center: Vector3<T>, _ up: Vector3<T>) -> Matrix4x4<T> {
-        if glmLeftHanded {
-            return lookAtLH(eye, center, up)
-        } else {
-            return lookAtRH(eye, center, up)
-        }
-    }
-
-    public static func lookAtLH<T: FloatingPointArithmeticType>
-        (_ eye: Vector3<T>, _ center: Vector3<T>, _ up: Vector3<T>) -> Matrix4x4<T> {
-        let f: Vector3<T> = normalize(center - eye)
-        let s: Vector3<T> = normalize(cross(up, f))
-        let u: Vector3<T> = cross(f, s)
-
-        let r30: T = -dot(s, eye)
-        let r31: T = -dot(u, eye)
-        let r32: T = -dot(f, eye)
-
-        return Matrix4x4<T>(
-            s.x, u.x, f.x, 0,
-            s.y, u.y, f.y, 0,
-            s.z, u.z, f.z, 0,
-            r30, r31, r32, 1
-        )
-    }
-
-    public static func lookAtRH<T: FloatingPointArithmeticType>
-        (_ eye: Vector3<T>, _ center: Vector3<T>, _ up: Vector3<T>) -> Matrix4x4<T> {
-        let f: Vector3<T> = normalize(center - eye)
-        let s: Vector3<T> = normalize(cross(f, up))
-        let u: Vector3<T> = cross(s, f)
-
-        let r30: T = -dot(s, eye)
-        let r31: T = -dot(u, eye)
-        let r32: T = dot(f, eye)
-
-        return Matrix4x4<T>(
-            s.x, u.x, -f.x, 0,
-            s.y, u.y, -f.y, 0,
-            s.z, u.z, -f.z, 0,
-            r30, r31, r32, 1
-        )
-    }
+    */
 }

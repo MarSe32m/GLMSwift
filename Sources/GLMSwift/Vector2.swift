@@ -6,7 +6,7 @@ public typealias vec2i = Vector2<Int>
 public typealias vec2u = Vector2<UInt>
 public typealias vec2d = Vector2<Double>
 public typealias vec2f = Vector2<Float>
-public typealias vec2  = vec3f
+public typealias vec2  = vec2f
 
 public struct Vector2<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public var x: T

@@ -2,7 +2,7 @@ import func Foundation.sin
 import func Foundation.cos
 import func Foundation.tan
 
-struct GLMSwift {
+public struct GLMSwift {
     public static func translation<T: FloatingPoint>(vector: Vector3<T>) -> Matrix4<T> {
         translation(vector)
     }

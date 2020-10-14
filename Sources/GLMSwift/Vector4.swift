@@ -13,6 +13,10 @@ public struct Vector4<T>: CustomStringConvertible, Equatable where T: Numeric, T
     public var y: T
     public var z: T
     public var w: T
+    
+    public var xyz: Vector3<T> {
+        Vector3<T>(x, y, z)
+    }
 
     public var description: String {
         "(\(x), \(y), \(z), \(w))"

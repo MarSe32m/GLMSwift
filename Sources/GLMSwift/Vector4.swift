@@ -26,7 +26,7 @@ public struct Vector4<T>: CustomStringConvertible, Equatable where T: Numeric, T
         -self
     }
 
-    public init(_ x: T = 0, _ y: T = 0, _ z: T = 0, _ w:T = 0) {
+    public init(_ x: T = 0, _ y: T = 0, _ z: T = 0, _ w: T = 0) {
         self.x = x
         self.y = y
         self.z = z
@@ -39,7 +39,7 @@ public struct Vector4<T>: CustomStringConvertible, Equatable where T: Numeric, T
         self.z = z
         self.w = w
     }
-    
+
     public init(_ vector3: Vector3<T>, _ w: T = 1) {
         self.x = vector3.x
         self.y = vector3.y

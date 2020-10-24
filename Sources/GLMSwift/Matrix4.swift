@@ -12,23 +12,26 @@ public typealias mat4  = mat4f
 
 
 /// Object that represents a 4 by 4 matrix
-/// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
+/// The matrix is COLUMN-major, so passing this to the shader is done with the transpose parameter set to GL_FALSE
 public struct Matrix4<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public var m11: T
-    public var m12: T
-    public var m13: T
-    public var m14: T
     public var m21: T
-    public var m22: T
-    public var m23: T
-    public var m24: T
     public var m31: T
-    public var m32: T
-    public var m33: T
-    public var m34: T
     public var m41: T
+
+    public var m12: T
+    public var m22: T
+    public var m32: T
     public var m42: T
+    
+    public var m13: T
+    public var m23: T
+    public var m33: T
     public var m43: T
+    
+    public var m14: T
+    public var m24: T
+    public var m34: T
     public var m44: T
 
     public var description: String {

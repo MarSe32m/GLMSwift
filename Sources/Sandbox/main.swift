@@ -1,5 +1,6 @@
 import GLMSwift
 import Dispatch
+import Benchmark
 
 let pos = vec3(203.0, -23, 6645)
 let scale = vec3(1, 1, 0)
@@ -29,23 +30,17 @@ func calculateTranslation(pointer: UnsafeMutablePointer<mat4>) -> mat4 {
     return transform
 }
 
-for _ in 0..<10 {
-    let startS = DispatchTime.now().uptimeNanoseconds
-    for _ in 0..<1_000_000 {
-        let transform = calculateTranslation(matrix: translationS)
-        let k = transform * translationS
-    }
-    let deltaS = DispatchTime.now().uptimeNanoseconds - startS
-    print("Pure struct took:", deltaS / 1_000_000, "ns")
-
-    let startA = DispatchTime.now().uptimeNanoseconds
-    for _ in 0..<1_000_000 {
-        let transform = calculateTranslation(pointer: &translationS)
-        let k = transform * translationS
-    }
-    let deltaA = DispatchTime.now().uptimeNanoseconds - startA
-    print("Pointer took:", deltaA / 1_000_000, "ns")
+benchmark("Struct matrix multiplication") {
+    let transform = translationS * translationS * translationS * translationS
+    let k = transform * translationS
 }
+
+benchmark("Array backed matrix multiplication") {
+    let transform = translationA * translationA * translationA * translationA
+    let k = transform * translationA
+}
+
+Benchmark.main()
 
 print(translationA * translationA * translationA * translationA)
 print(translationS * translationS * translationS * translationS)

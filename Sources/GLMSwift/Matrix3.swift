@@ -13,13 +13,15 @@ public typealias mat3  = mat3f
 /// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
 public struct Matrix3<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public var m11: T
-    public var m12: T
-    public var m13: T
     public var m21: T
-    public var m22: T
-    public var m23: T
     public var m31: T
+
+    public var m12: T
+    public var m22: T
     public var m32: T
+    
+    public var m13: T
+    public var m23: T
     public var m33: T
 
     public var description: String {

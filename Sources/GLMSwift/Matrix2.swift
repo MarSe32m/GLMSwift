@@ -14,8 +14,9 @@ public struct Matrix2<T>: CustomStringConvertible, Equatable where T: Numeric, T
     public private(set) var elements: [T] = Array<T>(repeating: 0, count: 4)
 
     public var m11: T
-    public var m12: T
     public var m21: T
+    
+    public var m12: T
     public var m22: T
 
     public var description: String {

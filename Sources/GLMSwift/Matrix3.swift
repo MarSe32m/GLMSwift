@@ -10,7 +10,7 @@ public typealias mat3f = Matrix3<Float>
 public typealias mat3  = mat3f
 
 /// Object that represents a 3 by 3 matrix
-/// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
+/// The matrix is COLUMN-major, so passing this to the shader is done with the transpose parameter set to GL_FALSE
 public struct Matrix3<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public var m11: T
     public var m21: T

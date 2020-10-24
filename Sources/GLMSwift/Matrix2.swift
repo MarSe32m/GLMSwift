@@ -9,13 +9,13 @@ public typealias mat2f = Matrix2<Float>
 public typealias mat2  = mat2f
 
 /// Object that represents a 2 by 2 matrix
-/// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
+/// The matrix is COLUMN-major, so passing this to the shader is done with the transpose parameter set to GL_FALSE
 public struct Matrix2<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public private(set) var elements: [T] = Array<T>(repeating: 0, count: 4)
 
     public var m11: T
     public var m21: T
-    
+
     public var m12: T
     public var m22: T
 

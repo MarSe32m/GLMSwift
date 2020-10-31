@@ -40,7 +40,6 @@ benchmark("Array backed matrix multiplication") {
     let k = transform * translationA
 }
 
-Benchmark.main()
 
 print(translationA * translationA * translationA * translationA)
 print(translationS * translationS * translationS * translationS)
@@ -65,3 +64,50 @@ vertexx.y = 324234.0
 doSomething(vertex: &vertexx.y)
 
 print(vertexx.y)
+
+for _ in 0..<100 { print() }
+
+struct SOA {
+    var position = [vec2]()
+    var velocity = [vec2]()
+    var shouldUpdate = [Bool]()
+}
+
+struct Particle {
+    var position: vec2
+    var velocity: vec2
+    var shouldUpdate: Bool
+}
+
+var particlesSOA = SOA()
+var particles = [Particle]()
+
+let particleCount = 100_0
+
+for _ in 0..<particleCount {
+    let position = vec2(Float.random(in: -1000...1000), Float.random(in: -1000...1000))
+    let velocity = vec2(Float.random(in: -1000...1000), Float.random(in: -1000...1000))
+    let shouldUpdate = Bool.random()
+    particlesSOA.position.append(position)
+    particlesSOA.velocity.append(velocity)
+    particlesSOA.shouldUpdate.append(shouldUpdate)
+    particles.append(Particle(position: position, velocity: velocity, shouldUpdate: shouldUpdate))
+}
+
+benchmark("OOP particle updating") {
+    for i in 0..<particleCount {
+        if particles[i].shouldUpdate {
+            particles[i].position += particles[i].velocity
+        }
+    }
+}
+
+benchmark("DOD particle updating") {
+    for i in 0..<particleCount {
+        if particlesSOA.shouldUpdate[i] {
+            particlesSOA.position[i] += particles[i].velocity
+        }
+    }
+}
+
+Benchmark.main()

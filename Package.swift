@@ -24,7 +24,7 @@ let package = Package(
             name: "GLMSwift",
             dependencies: []),
             .target(
-                name: "Sandbox",
+                name: "Testing",
                 dependencies: ["GLMSwift", "Benchmark"]),
     ]
 )

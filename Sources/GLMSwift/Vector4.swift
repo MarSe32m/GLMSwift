@@ -114,6 +114,7 @@ public extension Vector4 where T: FloatingPoint {
 
     func angle(with other: Vector4<T>) -> T {
         let x = self.dot(other) / (self.length * other.length)
+        //TODO: Float80, Float16?
         switch x {
             case let x as Double:
                 return acos(x) as? T ?? 0

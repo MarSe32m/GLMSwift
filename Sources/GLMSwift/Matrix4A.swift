@@ -1,12 +1,8 @@
-import GLMSwift
-
-
-
-public typealias mat4ia = Matrix4A<Int>
-public typealias mat4ua = Matrix4A<UInt>
-public typealias mat4da = Matrix4A<Double>
-public typealias mat4fa = Matrix4A<Float>
-public typealias mat4a  = mat4fa
+internal typealias mat4ia = Matrix4A<Int>
+internal typealias mat4ua = Matrix4A<UInt>
+internal typealias mat4da = Matrix4A<Double>
+internal typealias mat4fa = Matrix4A<Float>
+internal typealias mat4a  = mat4fa
 /// Array backed matrix, just for reference for now
 /// Object that represents a 4 by 4 matrix
 /// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
@@ -202,7 +198,7 @@ internal struct Matrix4A<T>: CustomStringConvertible, Equatable where T: Numeric
     }
 }
 
-public extension Matrix4A where T: BinaryFloatingPoint {
+extension Matrix4A where T: BinaryFloatingPoint {
     var inverse: Matrix4A<T> {
         let d00: T = elements[0] * elements[5] - elements[4] * elements[1]
         let d01: T = elements[0] * elements[6] - elements[4] * elements[2]
@@ -294,7 +290,7 @@ public extension Matrix4A where T: BinaryFloatingPoint {
     }
 }
 
-public extension Matrix4A where T: BinaryInteger {
+extension Matrix4A where T: BinaryInteger {
     var inverse: Matrix4A<T> {
         let d00: T = elements[0] * elements[5] - elements[4] * elements[1]
         let d01: T = elements[0] * elements[6] - elements[4] * elements[2]

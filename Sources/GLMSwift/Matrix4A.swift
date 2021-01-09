@@ -1,20 +1,16 @@
 import GLMSwift
 
-// Sorry for my mathematical background!
-// | m11 m12 m13 m14 |
-// | m21 m22 m23 m24 |
-// | m31 m32 m33 m34 |
-// | m41 m42 m43 m44 |
+
 
 public typealias mat4ia = Matrix4A<Int>
 public typealias mat4ua = Matrix4A<UInt>
 public typealias mat4da = Matrix4A<Double>
 public typealias mat4fa = Matrix4A<Float>
 public typealias mat4a  = mat4fa
-
+/// Array backed matrix, just for reference for now
 /// Object that represents a 4 by 4 matrix
 /// The matrix is ROW-major, so passing this to the shader is done with the transpose parameter set to GL_TRUE
-public struct Matrix4A<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
+internal struct Matrix4A<T>: CustomStringConvertible, Equatable where T: Numeric, T: SIMDScalar {
     public private(set) var elements: [T] = Array<T>(repeating: 0, count: 16)
 
     public var description: String {

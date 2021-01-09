@@ -8,12 +8,6 @@ let package = Package(
         .library(name: "GLMSwift", targets: ["GLMSwift"]),
     ],
     dependencies: [],
-    targets: [
-        .target(
-            name: "GLMSwift",
-            dependencies: []),
-            .target(
-                name: "Testing",
-                dependencies: ["GLMSwift"]),
+    targets: [.target(name: "GLMSwift")
     ]
 )

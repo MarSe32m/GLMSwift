@@ -1,6 +1,4 @@
-import func Foundation.sqrt
-import func Foundation.acos
-import struct Foundation.CGFloat
+import Foundation
 
 public typealias vec4i = Vector4<Int>
 public typealias vec4u = Vector4<UInt>
@@ -117,8 +115,6 @@ public extension Vector4 where T: FloatingPoint {
         //TODO: Float80, Float16?
         switch x {
             case let x as Double:
-                return acos(x) as? T ?? 0
-            case let x as CGFloat:
                 return acos(x) as? T ?? 0
             case let x as Float:
                 return acos(x) as? T ?? 0
